@@ -1,0 +1,30 @@
+import streamlit as st
+from langchain_core.prompts import ChatPromptTemplate
+from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_core.output_parsers import StrOutputParser
+
+# Define the chat template
+chat_template = ChatPromptTemplate(
+    messages=[
+        ("system", "You are a helpful AI assistant travel planner. Give travel options including train, bus, cab or flight and an approximate cost of travel from {source} to {destination}."),
+        ("human", "Find travel options from {source} to {destination}.")
+    ]
+)
+
+# Initialize the chat model
+chat_model = ChatGoogleGenerativeAI(api_key="api_key", model="gemini-2.0-flash-exp", temperature=1)
+parser = StrOutputParser()
+chain = chat_template | chat_model | parser
+
+# Streamlit UI
+st.title("AI Travel Planner")
+source = st.text_input("Enter Source Location:")
+destination = st.text_input("Enter Destination Location:")
+
+if st.button("Get Travel Options"):
+    if source and destination:
+        travel_info = chain.invoke({"source": source, "destination": destination})
+        st.write(travel_info)
+    else:
+        st.warning("Please enter both source and destination.")
+
